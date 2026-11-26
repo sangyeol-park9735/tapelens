@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TapeLens — see, run and share any TapeOut circuit on X Layer</title>
+<meta name="description" content="Open any TapeOut circuit on X Layer, flip its inputs, run it on-chain and share a verifiable result link.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo">◧</span> TapeLens</div>
+  <div class="tag">See, run and share any TapeOut circuit on X Layer — read-only, no wallet needed.</div>
+</header>
+
+<main>
+  <section class="picker card">
+    <div class="row">
+      <label>Processor
+        <select id="proc"></select>
+      </label>
+      <label>Circuit ID
+        <input id="cid" type="number" min="1" value="1">
+      </label>
+      <button id="load" class="primary">Open circuit</button>
+      <button id="rand">Random</button>
+    </div>
+    <div class="meta" id="procMeta">—</div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <h2>Circuit</h2>
+      <div id="info" class="info">Pick a processor and circuit.</div>
+      <div id="diagram" class="diagram"></div>
+      <div class="legend"><span class="sw on"></span> signal is 1 <span class="sw off"></span> signal is 0 · NAND gates in order, outputs on the right</div>
+    </div>
+
+    <div class="card">
+      <h2>Run it</h2>
+      <div id="inputs" class="pins"></div>
+      <div class="actions">
+        <button id="runChain" class="primary">Run on X Layer</button>
+        <button id="tt">Truth table</button>
+        <button id="share">Copy share link</button>
+      </div>
+      <div id="result" class="result"></div>
+      <div id="ttbox" class="ttbox"></div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <h2>Does it do what the seller says?</h2>
+      <div class="meta">Write the behaviour you expect, one output per line. TapeLens runs <b>every input row on-chain</b> (up to 8 inputs) and checks it against your spec, not against itself.</div>
+      <textarea id="spec" rows="4" spellcheck="false" placeholder="o0 = i0 ^ i1&#10;o1 = i0 &amp; i1"></textarea>
+      <div class="actions">
+        <button id="checkSpec" class="primary">Check spec on X Layer</button>
+        <button id="useGuess">Fill with detected function</button>
+        <button id="badge">Get embeddable badge</button>
+      </div>
+      <div id="specOut" class="result"></div>
+      <div id="badgeOut" class="result"></div>
+    </div>
+    <div class="card">
+      <h2>What is this circuit?</h2>
+      <div id="ident" class="result meta">Open a circuit to identify its outputs.</div>
+      <div class="actions"><button id="twins">Find circuits with the same function</button></div>
+      <div id="twinOut" class="result"></div>
+    </div>
+  </section>
+
+  <section class="card how">
+    <h2>How it works</h2>
+    <ol>
+      <li><b>Reads the chain directly.</b> TapeLens calls <code>circuitInfo(id)</code> and <code>netlist(id)</code> on the TapeOut processor contract through the public X Layer RPC.</li>
+      <li><b>Simulates locally.</b> The NAND/LATCH netlist is decoded and run in your browser, so every gate lights up as you flip inputs.</li>
+      <li><b>Checks against the contract.</b> “Run on X Layer” calls <code>eval(id, inputs)</code> on-chain and compares it bit by bit with the local result, stamped with the block number.</li>
+      <li><b>Shares proof.</b> The share link encodes processor, circuit and inputs — anyone opening it re-runs the same check on-chain.</li>
+    </ol>
+  </section>
+</main>
+
+<footer>Data: X Layer mainnet (chain 196) · TapeOut processor contracts · nothing is signed or sent.</footer>
+<script src="core.js"></script>
+<script src="spec.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

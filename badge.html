@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>TapeLens badge</title>
+<style>
+body{margin:0;font:13px/1.45 "Segoe UI",system-ui,sans-serif;background:transparent;color:#e7ebf3}
+.b{background:#151922;border:1px solid #262c39;border-radius:12px;padding:12px 14px;max-width:400px}
+.h{display:flex;align-items:center;gap:8px;font-weight:800}
+.l{color:#c6f34f;font-size:16px}
+.s{margin-top:6px}.m{color:#8e98ab;font-size:12px}
+.ok{color:#c6f34f;font-weight:700}.bad{color:#ff6b6b;font-weight:700}
+a{color:#8e98ab}
+</style></head>
+<body><div class="b">
+  <div class="h"><span class="l">◧</span><span id="t">TapeOut circuit</span></div>
+  <div class="s" id="st">Checking on X Layer…</div>
+  <div class="m" id="fn"></div>
+  <div class="m"><a id="open" target="_blank" rel="noopener">Open in TapeLens</a> · read-only, re-checked on every load</div>
+</div>
+<script src="core.js"></script>
+<script src="spec.js"></script>
+<script>
+(async () => {
+  const q = new URLSearchParams(location.search);
+  const proc = q.get('p'), id = parseInt(q.get('id') || '0'), specText = q.get('spec') || '';
+  const $ = (x) => document.getElementById(x);
+  $('open').href = 'index.html?' + new URLSearchParams({ p: proc, id: String(id) });
+  try {
+    const [nm, info] = await Promise.all([call(proc, SEL.name).then(decodeString), circuitInfo(proc, id)]);
+    $('t').textContent = `${nm} circuit #${id}`;
+    const c = { ...info, gates: parseNetlist(decodeBytes(await call(proc, SEL.netlist + u256(id)))) };
+    const ids = identify(c);
+    $('fn').textContent = (ids.length ? ids.join(' · ') : `${c.nIn} in / ${c.nOut} out`) + ` · ${c.gates.length} gates`;
+    if (c.nState || c.nIn > 8) { $('st').innerHTML = '<span class="m">Stateful or wide circuit — on-chain row check not available.</span>'; return; }
+    const { rows, block } = await evalAllRowsOnChain(proc, id, c.nIn, c.nOut);
+    let fns = null; if (specText) fns = parseSpec(specText, c.nIn, c.nOut);
+    let bad = 0;
+    rows.forEach((r, m) => {
+      const x = Array.from({ length: c.nIn }, (_, i) => (m >> i) & 1);
+      const want = fns ? fns.map((f, k) => (f ? f(x) : r[k])) : simulate(c, x).outs;
+      want.forEach((w, k) => { if (w !== r[k]) bad++; });
+    });
+    $('st').innerHTML = bad
+      ? `<span class="bad">✗ ${bad} mismatch(es)</span> <span class="m">${fns ? 'against the published spec' : 'against its netlist'} · block ${block.toLocaleString()}</span>`
+      : `<span class="ok">✓ ${fns ? 'Matches the published spec' : 'Netlist and contract agree'}</span> <span class="m">on all ${rows.length} input rows · X Layer block ${block.toLocaleString()}</span>`;
+  } catch (e) { $('st').innerHTML = `<span class="bad">Could not check: ${e.message}</span>`; }
+})();
+</script>
+</body></html>

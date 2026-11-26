@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Example circuit marketplace listing (demo)</title>
+<style>
+body{margin:0;font:15px/1.5 Georgia,serif;background:#f4f1ea;color:#222}
+.wrap{max-width:860px;margin:30px auto;padding:0 20px}
+.note{font:12px sans-serif;background:#fff3c4;border:1px solid #e6d27a;padding:6px 10px;border-radius:6px;display:inline-block}
+.card{background:#fff;border:1px solid #ddd;border-radius:12px;padding:20px;margin-top:16px;display:grid;grid-template-columns:1fr 420px;gap:20px}
+h1{margin:6px 0 4px;font-size:26px}.price{font:700 18px sans-serif;margin-top:10px}
+button{font:600 14px sans-serif;background:#222;color:#fff;border:0;border-radius:8px;padding:10px 16px;margin-top:12px}
+</style></head>
+<body><div class="wrap">
+<span class="note">Demo page: shows how a marketplace embeds the TapeLens badge. Not a real store.</span>
+<div class="card">
+  <div>
+    <div style="font:12px sans-serif;color:#777">Circuit listing · FAB-Genisis processor</div>
+    <h1>4-input logic block #3968</h1>
+    <p>Seller's description: compact 20-gate circuit. Buyers can verify on-chain behaviour before using it.</p>
+    <div class="price">Listing price shown by the marketplace</div>
+    <button>Use this circuit</button>
+  </div>
+  <iframe src="badge.html?p=0x87bfca3494aa228ff589ab9b642143a5e8c8f9a6&id=3968" width="420" height="150" style="border:0"></iframe>
+</div>
+</div></body></html>
